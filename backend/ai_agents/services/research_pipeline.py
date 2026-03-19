@@ -36,7 +36,15 @@ def process_article(article):
 
     summary = summarize(article["content"] or title)
 
-    relevance_score = min(score + 0.3, 1.0)
+    # Base relevance from sentiment confidence
+    relevance_score = score
+
+    # Boost relevance if strong events detected
+    if events:
+        relevance_score += 0.2
+
+    # Normalize
+    relevance_score = min(relevance_score, 1.0)
 
     processed = {
         "title": title,
@@ -82,6 +90,33 @@ def calculate_sector_trends(processed_articles):
             sector_trends[sector] = "Neutral"
 
     return sector_trends
+
+def link_news_to_portfolio(processed_articles, portfolio_holdings):
+
+    linked_results = []
+
+    for article in processed_articles:
+
+        matched_assets = []
+
+        title = article["title"].lower()
+
+        for holding in portfolio_holdings:
+
+            symbol = holding["symbol"].lower()
+
+            if symbol in title:
+                matched_assets.append(symbol)
+
+        linked_results.append({
+            "title": article["title"],
+            "sector": article["sector"],
+            "sentiment": article["sentiment"],
+            "relevance_score": article["relevance_score"],
+            "linked_assets": matched_assets
+        })
+
+    return linked_results
 
 # -----------------------------
 # MAIN PIPELINE

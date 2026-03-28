@@ -1,14 +1,15 @@
 require("dotenv").config();
 
 const app = require("./app");
-const researchRoutes = require("./routes/researchRoutes");
+
+// Import routes
+const agentRoutes = require("./routes/agent.routes");
 
 const PORT = process.env.PORT || 5000;
 
-// Register routes FIRST
-app.use("/api", researchRoutes);
+// Register routes
+app.use("/api", agentRoutes);
 
-// Start server
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });

@@ -1,8 +1,23 @@
 const express = require("express");
 const router = express.Router();
 
-const { runResearchAgent } = require("../controllers/researchController");
+const {
+  researchAgent,
+  riskAgent,
+  communicationAgent,
+  portfolioAgent,
+} = require("../controllers/agent.controller");
 
-router.post("/research", runResearchAgent);
+// 🔹 Research
+router.post("/research", researchAgent);
+
+// 🔹 Risk
+router.get("/risk", riskAgent);
+
+// 🔹 Communication
+router.post("/communication", communicationAgent);
+
+// 🔹 Portfolio (ML Model)
+router.get("/portfolio", portfolioAgent);
 
 module.exports = router;

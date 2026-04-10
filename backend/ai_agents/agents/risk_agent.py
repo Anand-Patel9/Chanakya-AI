@@ -7,11 +7,9 @@ from services.risk_service import (
     calculate_risk_score
 )
 
-from db.supabase_client import fetch_portfolio_holdings
-
-
 def run_risk_agent(portfolio_id=None):
 
+    from db.supabase_client import fetch_portfolio_holdings
     # -----------------------------
     # FETCH PORTFOLIO DATA
     # -----------------------------

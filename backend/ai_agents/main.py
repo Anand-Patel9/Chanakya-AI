@@ -1,13 +1,29 @@
+# -------------------------------
+# LOAD ENV VARIABLES (VERY FIRST)
+# -------------------------------
+import os
+from dotenv import load_dotenv
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ENV_PATH = os.path.join(BASE_DIR, ".env")
+
+load_dotenv(dotenv_path=ENV_PATH)
+
+# Debug (remove later if needed)
+print("GROQ:", os.getenv("GROQ_API_KEY"))
+
+
+# -------------------------------
+# IMPORTS (AFTER ENV LOAD)
+# -------------------------------
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-# -------------------------------
-# IMPORT AGENTS
-# -------------------------------
-from agents.research_agent import run_research_agent
 from agents.risk_agent import run_risk_agent
+from agents.research_agent import run_research_agent
 from agents.communication_agent import run_communication_agent
-from agents.portfolio_agent import run_portfolio_agent
+from orchestrator import run_orchestrator
+
 
 # -------------------------------
 # FASTAPI INIT
@@ -15,6 +31,9 @@ from agents.portfolio_agent import run_portfolio_agent
 app = FastAPI()
 
 
+# -------------------------------
+# REQUEST MODEL
+# -------------------------------
 class Question(BaseModel):
     question: str
 
@@ -24,19 +43,13 @@ class Question(BaseModel):
 # -------------------------------
 @app.get("/")
 def home():
-    return {"status": "Chanakya AI System Running 🚀"}
+    return {
+        "status": "Chanakya AI System Running 🚀"
+    }
 
 
 # -------------------------------
-# RESEARCH
-# -------------------------------
-@app.post("/research")
-def research():
-    return run_research_agent()
-
-
-# -------------------------------
-# RISK
+# RISK AGENT
 # -------------------------------
 @app.get("/risk")
 def risk():
@@ -44,7 +57,15 @@ def risk():
 
 
 # -------------------------------
-# COMMUNICATION
+# RESEARCH AGENT
+# -------------------------------
+@app.get("/research")
+def research():
+    return run_research_agent()
+
+
+# -------------------------------
+# COMMUNICATION AGENT
 # -------------------------------
 @app.post("/communication")
 def communication(data: Question):
@@ -52,8 +73,8 @@ def communication(data: Question):
 
 
 # -------------------------------
-# ✅ ONLY PORTFOLIO ROUTE
+# ORCHESTRATOR (MAIN API)
 # -------------------------------
-@app.get("/portfolio")
-def portfolio():
-    return run_portfolio_agent()
+@app.post("/orchestrate")
+def orchestrate(data: Question):
+    return run_orchestrator(data.question)

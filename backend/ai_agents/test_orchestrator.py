@@ -1,5 +1,11 @@
-from orchestrator import run_orchestrator
+import os
+from dotenv import load_dotenv
 
-result = run_orchestrator("What is happening in the market today?")
+# Get path to backend folder (one level up)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ENV_PATH = os.path.join(BASE_DIR, ".env")
 
-print(result)
+load_dotenv(dotenv_path=ENV_PATH)
+
+# Debug (remove later)
+print("GROQ:", os.getenv("GROQ_API_KEY"))

@@ -15,12 +15,21 @@ MODEL_PATH = os.path.join(DATASET_PATH, "chanakya_portfolio_ppo_final.zip")
 DATA_PATH = os.path.join(DATASET_PATH, "chanakya_raw_data.csv")
 
 # -------------------------------
-# LOAD MODEL (ONLY ONCE)
+# SAFE MODEL LOADING
 # -------------------------------
-model = PPO.load(MODEL_PATH)
+model = None
+
+def load_model():
+    global model
+    if model is None:
+        if not os.path.exists(MODEL_PATH):
+            raise Exception(f"Model not found at {MODEL_PATH}")
+        model = PPO.load(MODEL_PATH)
+    return model
+
 
 # -------------------------------
-# LOAD & PREP DATA (LIGHT VERSION)
+# LOAD & PREP DATA
 # -------------------------------
 df = pd.read_csv(DATA_PATH)
 
@@ -32,8 +41,9 @@ df['Return'] = df.groupby('Symbol')['Close'].pct_change().fillna(0)
 
 pivot_returns = df.pivot(index='Date', columns='Symbol', values='Return').fillna(0)
 
+
 # -------------------------------
-# ENVIRONMENT (SAME AS TRAIN)
+# ENVIRONMENT
 # -------------------------------
 class ChanakyaPortfolioEnv(gym.Env):
 
@@ -88,19 +98,29 @@ class ChanakyaPortfolioEnv(gym.Env):
 
         return self._get_obs(), float(reward), terminated, truncated, {}
 
+
 # -------------------------------
 # MAIN FUNCTION
 # -------------------------------
 def run_portfolio_agent():
+    try:
+        model = load_model()
 
-    env = ChanakyaPortfolioEnv(pivot_returns)
+        env = ChanakyaPortfolioEnv(pivot_returns)
+        obs, _ = env.reset()
 
-    obs, _ = env.reset()
+        action, _ = model.predict(obs, deterministic=True)
 
-    action, _ = model.predict(obs, deterministic=True)
+        # ✅ Softmax (better than raw normalization)
+        exp_weights = np.exp(action)
+        weights = exp_weights / np.sum(exp_weights)
 
-    weights = action / (np.sum(action) + 1e-8)
+        return {
+            "portfolio": dict(zip(top_stocks, weights.tolist()))
+        }
 
-    return {
-        "portfolio": dict(zip(top_stocks, weights.tolist()))
-    }
+    except Exception as e:
+        return {
+            "error": "Portfolio Agent Failed",
+            "details": str(e)
+        }

@@ -52,7 +52,7 @@ def research_node(state: AgentState):
     print("Running Research Agent...")
 
     try:
-        result = run_research_agent()
+        result = run_research_agent(state["query"])
     except Exception as e:
         result = {"error": str(e)}
 

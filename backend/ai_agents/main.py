@@ -59,10 +59,9 @@ def risk():
 # -------------------------------
 # RESEARCH AGENT
 # -------------------------------
-@app.get("/research")
-def research():
-    return run_research_agent()
-
+@app.post("/research")
+def research(data: Question):
+    return run_research_agent(data.question)
 
 # -------------------------------
 # COMMUNICATION AGENT

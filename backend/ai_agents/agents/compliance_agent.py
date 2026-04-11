@@ -8,9 +8,12 @@ def run_compliance_agent(state):
 
     response = state.get("final_response", "")
 
+    # ✅ FIX: ensure string
+    if isinstance(response, dict):
+        response = str(response)
+
     result = check_compliance(response)
 
-    # Store in DB
     store_compliance_log(result)
 
     return {

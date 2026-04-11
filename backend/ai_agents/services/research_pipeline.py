@@ -23,7 +23,16 @@ def deduplicate_articles(articles):
 
     return unique
 
+def extract_symbol(query: str):
+    query = query.upper()
+    words = query.split()
 
+    for word in words:
+        # Basic rule: stock symbols are short uppercase words
+        if word.isalpha() and 1 <= len(word) <= 5:
+            return word
+
+    return "AAPL"  # fallback
 # -----------------------------
 # PROCESS SINGLE ARTICLE
 # -----------------------------
@@ -121,14 +130,15 @@ def link_news_to_portfolio(processed_articles, portfolio_holdings):
 # -----------------------------
 # MAIN PIPELINE
 # -----------------------------
-async def run_research_pipeline():
+async def run_research_pipeline(query):
 
-    # Async execution
+    # extract symbol from query (simple version)
+    symbol = extract_symbol(query)
+
     news_task = asyncio.to_thread(fetch_news)
-    market_task = asyncio.to_thread(fetch_market_data)
+    market_task = asyncio.to_thread(fetch_market_data, symbol)
 
     news, market = await asyncio.gather(news_task, market_task)
-
     # Deduplicate
     news = deduplicate_articles(news)
 

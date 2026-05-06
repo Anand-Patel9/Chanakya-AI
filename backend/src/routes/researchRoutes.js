@@ -1,8 +1,25 @@
-const express = require("express");
+import express from "express";
+import fetch from "node-fetch";
+
 const router = express.Router();
 
-const { runResearchAgent } = require("../controllers/researchController");
+router.post("/generate", async (req, res) => {
+  try {
+    const response = await fetch("http://localhost:8000/research/generate", {
+      method: "POST"
+    });
 
-router.get("/research", runResearchAgent);
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: "Research Agent failed" });
+  }
+});
 
-module.exports = router;
+router.get("/insights", async (req, res) => {
+  const response = await fetch("http://localhost:8000/research/insights");
+  const data = await response.json();
+  res.json(data);
+});
+
+export default router;

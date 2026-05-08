@@ -97,21 +97,3 @@ fetch("http://localhost:3000/api/ai/rag/query", {
 .then(data => console.log(data));
 
 
-🛠️ Setup Instructions
-1. Clone Repo
-git clone <repo_url>
-cd <project>
-2. Install Dependencies
-npm install
-pip install -r requirements.txt
-3. Add Environment Variables
-
-Create .env file:
-
-GROQ_API_KEY=your_key
-NEWS_API_KEY=your_key
-4. Run Backend
-Start FastAPI
-uvicorn ai_agents.main:app --reload
-Start Node Server
-npm start

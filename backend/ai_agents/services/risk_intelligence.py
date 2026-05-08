@@ -2,9 +2,11 @@ from services.research_service import get_insights
 from services.sector_mapper import map_sectors
 
 
-def aggregate_market_risk():
+def aggregate_market_risk(insights=None):
 
-    insights = get_insights().data or []
+    # ✅ USE PASSED DATA (OPTIMIZED FLOW)
+    if not insights:
+        insights = get_insights().data or []
 
     sector_risk = {}
     risk_weights = {"Low": 1, "Medium": 2, "High": 3}
@@ -13,10 +15,11 @@ def aggregate_market_risk():
         sectors = ins.get("affected_sectors", [])
         sectors = map_sectors(sectors)
 
-        risk = ins.get("risk_level", "Low")  # ✅ FIX
-
         if not isinstance(sectors, list):
             continue
+
+        # ✅ FIX: define risk
+        risk = ins.get("risk_level", "Low")
 
         for s in sectors:
             if s not in sector_risk:

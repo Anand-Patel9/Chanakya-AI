@@ -3,6 +3,9 @@ import json
 import re
 from groq import Groq
 
+# ✅ ADD THIS (GLOBAL CLIENT)
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+
 
 def clean_json(text):
     text = re.sub(r"```json|```", "", text).strip()
@@ -12,9 +15,7 @@ def clean_json(text):
 
 def generate_insight(news_item):
     try:
-        # ✅ CREATE CLIENT HERE (SAFE)
-        client = Groq(api_key=os.getenv("GROQ_API_KEY"))
-
+        # ✅ USE GLOBAL CLIENT (REMOVE LOCAL ONE)
         prompt = f"""
         Convert into STRICT JSON:
 

@@ -5,73 +5,104 @@ NEWS_API_KEY = os.getenv("NEWS_API_KEY")
 GNEWS_API_KEY = os.getenv("GNEWS_API_KEY")
 FINNHUB_API_KEY = os.getenv("FINNHUB_API_KEY")
 
-print("NEWS API KEY:", NEWS_API_KEY)
 
-def fetch_newsapi():
+# -----------------------------
+# 🔧 NORMALIZER (COMMON FORMAT)
+# -----------------------------
+def normalize_article(article):
+    return {
+        "title": article.get("title") or article.get("headline"),
+        "description": article.get("description") or article.get("summary"),
+        "source": article.get("source", {}).get("name") if isinstance(article.get("source"), dict) else article.get("source"),
+        "url": article.get("url")
+    }
+
+
+# -----------------------------
+# 📰 NEWSAPI
+# -----------------------------
+def fetch_newsapi(query):
     try:
-        url = f"https://newsapi.org/v2/everything?q=stock OR market OR finance OR economy&language=en&pageSize=20&apiKey={NEWS_API_KEY}"
-        res = requests.get(url)
-        data = res.json()
+        url = "https://newsapi.org/v2/everything"
 
-        articles = data.get("articles", [])
+        params = {
+            "q": query or "stock market economy finance",
+            "language": "en",
+            "pageSize": 20,
+            "apiKey": NEWS_API_KEY
+        }
+
+        res = requests.get(url, params=params).json()
+        articles = res.get("articles", [])
+
         print(f"🟢 NewsAPI fetched: {len(articles)}")
 
-        return articles
+        return [normalize_article(a) for a in articles]
+
     except Exception as e:
         print("❌ NewsAPI Error:", e)
         return []
 
 
-def fetch_gnews():
+# -----------------------------
+# 🌍 GNEWS
+# -----------------------------
+def fetch_gnews(query):
     try:
-        url = f"https://gnews.io/api/v4/search?q=stock market OR economy OR finance&lang=en&max=20&apikey={GNEWS_API_KEY}"
-        res = requests.get(url)
-        data = res.json()
+        url = "https://gnews.io/api/v4/search"
 
-        articles = data.get("articles", [])
+        params = {
+            "q": query or "stock market economy finance",
+            "lang": "en",
+            "max": 20,
+            "token": GNEWS_API_KEY
+        }
+
+        res = requests.get(url, params=params).json()
+        articles = res.get("articles", [])
+
         print(f"🟢 GNews fetched: {len(articles)}")
 
-        return articles
+        return [normalize_article(a) for a in articles]
+
     except Exception as e:
         print("❌ GNews Error:", e)
         return []
 
 
+# -----------------------------
+# 📊 FINNHUB
+# -----------------------------
 def fetch_finnhub():
     try:
-        url = f"https://finnhub.io/api/v1/news?category=general&token={FINNHUB_API_KEY}"
-        res = requests.get(url)
-        data = res.json()
+        url = "https://finnhub.io/api/v1/news"
 
-        print(f"🟢 Finnhub fetched: {len(data)}")
+        params = {
+            "category": "general",
+            "token": FINNHUB_API_KEY
+        }
 
-        return data
+        res = requests.get(url, params=params).json()
+
+        print(f"🟢 Finnhub fetched: {len(res)}")
+
+        return [normalize_article(a) for a in res[:20]]
+
     except Exception as e:
         print("❌ Finnhub Error:", e)
         return []
 
 
-def normalize_article(article):
-    return {
-        "title": article.get("title") or article.get("headline"),
-        "description": article.get("description") or article.get("summary"),
-    }
-
-
-def get_all_news():
-    all_news = []
-
-    newsapi = fetch_newsapi()
-    gnews = fetch_gnews()
+# -----------------------------
+# 🚀 AGGREGATOR (OPTIONAL USE)
+# -----------------------------
+def get_all_news(query="stock market"):
+    newsapi = fetch_newsapi(query)
+    gnews = fetch_gnews(query)
     finnhub = fetch_finnhub()
 
-    all_news.extend(newsapi)
-    all_news.extend(gnews)
-    all_news.extend(finnhub)
+    combined = newsapi + gnews + finnhub
 
-    # normalize
-    cleaned = [normalize_article(a) for a in all_news if a]
+    print(f"📰 TOTAL NEWS: {len(combined)}")
 
-    print(f"📰 TOTAL CLEANED NEWS: {len(cleaned)}")
-
-    return cleaned
+    return combined

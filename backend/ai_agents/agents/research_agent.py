@@ -5,11 +5,24 @@ from services.ranking_service import rank_insights
 from services.region_service import classify_region
 from services.sector_mapper import map_sectors   # ✅ FIXED IMPORT
 from services.action_mapper import normalize_action   # ✅ NEW IMPORT
+from services.research_service import store_insights, get_insights  # ✅ NEW IMPORT
+
+
+# -----------------------------
+# CACHE CHECK
+# -----------------------------
+
 
 
 def run_research_agent():
     try:
         print("🚀 Running Research Agent...")
+
+        cached = get_insights().data or []
+
+        if cached and len(cached) > 0:
+            print("⚡ Using cached insights")
+            return cached[:5]   # limit like your normal output
 
         news = get_all_news()
         print(f"📰 Fetched {len(news)} news")
@@ -17,7 +30,7 @@ def run_research_agent():
         insights = []
         seen = set()
 
-        for item in news[:20]:
+        for item in news[:8]:
             try:
                 title = item.get("title")
 

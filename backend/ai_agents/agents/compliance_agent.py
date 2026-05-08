@@ -6,13 +6,10 @@ def run_compliance_agent(state):
 
     print("Running Compliance Agent...")
 
-    response = state.get("final_response", "")
+    # 🔥 CHANGE: pass FULL RISK OUTPUT (not just text)
+    risk_data = state.get("risk_output", {})
 
-    # ✅ FIX: ensure string
-    if isinstance(response, dict):
-        response = str(response)
-
-    result = check_compliance(response)
+    result = check_compliance(risk_data)
 
     store_compliance_log(result)
 

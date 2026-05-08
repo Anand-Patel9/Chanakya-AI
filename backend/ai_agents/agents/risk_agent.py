@@ -19,7 +19,7 @@ from services.decision_engine import generate_portfolio_decisions
 from services.rebalancer import suggest_rebalancing
 
 
-def run_risk_agent(portfolio_id=None):
+def run_risk_agent(portfolio_id=None, research_data=None):
 
     from db.supabase_client import fetch_portfolio_holdings
 
@@ -61,7 +61,7 @@ def run_risk_agent(portfolio_id=None):
     # -----------------------------
     # MARKET INTELLIGENCE
     # -----------------------------
-    market_risk = aggregate_market_risk()
+    market_risk = aggregate_market_risk(research_data)
     portfolio_risk_map = map_portfolio_risk(sector_exposure, market_risk)
 
     # -----------------------------

@@ -42,14 +42,27 @@ def store_research_brief(data):
 # FETCH PORTFOLIO HOLDINGS
 # -----------------------------
 def fetch_portfolio_holdings(portfolio_id):
+    try:
+        # 🔥 Validate portfolio_id (UUID should be long string)
+        if not portfolio_id or len(str(portfolio_id)) < 10:
+            print("⚠️ Invalid portfolio_id, using fallback")
+            return []
 
-    response = supabase.table("portfolio_holdings") \
-        .select("*") \
-        .eq("portfolio_id", portfolio_id) \
-        .execute()
+        response = supabase.table("portfolio_holdings") \
+            .select("*") \
+            .eq("portfolio_id", portfolio_id) \
+            .execute()
 
-    return response.data
+        # 🔥 Handle empty response safely
+        if not response.data:
+            print("⚠️ No holdings found for portfolio_id:", portfolio_id)
+            return []
 
+        return response.data
+
+    except Exception as e:
+        print("❌ DB Error in fetch_portfolio_holdings:", e)
+        return []
 # -----------------------------
 # STORE COMPLIANCE REPORT
 # -----------------------------

@@ -1,8 +1,10 @@
 def basic_score(i):
+    confidence = i.get("confidence_score") or 0
+
     return (
         (3 if i.get("risk_level") == "high" else 2 if i.get("risk_level") == "medium" else 1)
         + (2 if i.get("sentiment") == "negative" else 1)
-        + i.get("confidence_score", 0)
+        + confidence
     )
 
 
@@ -23,11 +25,12 @@ def advanced_score(i):
     elif i.get("sentiment") == "positive":
         score += 2
 
-    # Confidence
-    score += i.get("confidence_score", 0)
+    # ✅ SAFE CONFIDENCE (FIX)
+    confidence = i.get("confidence_score") or 0
+    score += confidence
 
     # Sector boost
-    sectors = i.get("affected_sectors", [])
+    sectors = i.get("affected_sectors", []) or []
 
     if "Banking & Financial Services" in sectors:
         score += 3

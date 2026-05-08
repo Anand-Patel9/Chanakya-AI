@@ -204,18 +204,26 @@ def rag_node(state: AgentState):
 
     print("📚 Running RAG Retrieval...")
 
+    query = (state.get("query") or "").lower()
+    doc_id = state.get("doc_id")
+
+    # 🔥 SMART TRIGGER CONDITIONS
+    rag_keywords = [
+        "document", "pdf", "report", "file",
+        "uploaded", "my data", "this doc"
+    ]
+
+    use_rag = any(k in query for k in rag_keywords)
+
+    # ❌ Skip RAG if not needed
+    if not use_rag or not doc_id:
+        print("⛔ Skipping RAG (not needed)")
+        return {**state, "rag_context": ""}
+
     try:
         from services.rag_service import generate_rag_answer
 
-        doc_id = state.get("doc_id")  # optional
-
-        if not doc_id:
-            return {**state, "rag_context": ""}
-
-        rag_result = generate_rag_answer(
-            state.get("query"),
-            doc_id
-        )
+        rag_result = generate_rag_answer(query, doc_id)
 
         context = rag_result.get("answer", "")
 
@@ -223,10 +231,7 @@ def rag_node(state: AgentState):
 
     except Exception as e:
         print("❌ RAG error:", e)
-        rag_result = ""
-
-    return {**state, "rag_context": rag_result}
-
+        return {**state, "rag_context": ""}
 
 # -----------------------------
 # 🧩 GRAPH BUILDER

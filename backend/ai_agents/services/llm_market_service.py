@@ -78,26 +78,28 @@ def generate_market_analysis(intel):
     # 🔥 BLOOMBERG-LEVEL PROMPT
     # -----------------------------
     prompt = f"""
-You are a senior macro strategist at a global asset management firm.
+    You are a senior macro strategist at a global asset management firm.
 
-DATA (STRICTLY USE ONLY THIS):
-{context}
+    DATA:
+    {context}
 
-ANALYSIS RULES:
-- Identify EXACTLY 1–2 dominant drivers
-- Convert drivers into cause → market impact
-- Mention sectors/assets where relevant
-- NO generic phrases like "mixed signals" or "uncertainty"
-- NO repeating same words
+    INSTRUCTIONS:
+    - Identify the SINGLE most dominant market driver
+    - If Document Insight is present → MUST integrate it into explanation
+    - Convert into cause → effect chain (macro → sector → asset)
+    - Mention specific sectors/assets (tech stocks, bonds, oil, etc.)
+    - Be decisive and analytical (no hedging)
+    - DO NOT use generic phrases like "uncertainty", "mixed signals", or "volatility" without explanation
+    - Avoid repeating the same words
 
-OUTPUT (STRICT JSON):
+    OUTPUT (STRICT JSON):
 
-{{
-  "what_is_happening": "Clear market movement with asset-level impact",
-  "why_it_is_happening": "Cause → effect chain (e.g., oil ↑ → inflation ↑ → equities ↓)",
-  "what_to_do": "Precise action (sector allocation / risk positioning)"
-}}
-"""
+    {{
+    "what_is_happening": "Clear market movement with asset-level impact",
+    "why_it_is_happening": "Driver → effect chain WITH document linkage if present",
+    "what_to_do": "Precise portfolio action (sector allocation or risk positioning)"
+    }}
+    """
 
     try:
         response = client.chat.completions.create(
@@ -120,6 +122,23 @@ OUTPUT (STRICT JSON):
         what = safe_text(parsed.get("what_is_happening"))
         why = safe_text(parsed.get("why_it_is_happening"))
         action = safe_text(parsed.get("what_to_do"))
+
+        # 🔥 FORCE INTELLIGENCE
+
+        if "document insight" in context.lower() and "document" not in why.lower():
+            why = f"{why} combined with company-level signals from recent disclosures impacting sector outlook"
+
+        # Remove weak phrasing
+        if "due to" in why.lower():
+            why = why.replace("due to", "").strip()
+
+        # Expand weak explanation
+        if len(why.split()) < 8:
+            why = f"{why} leading to sector-level repricing and investor repositioning"
+
+        # Strengthen action
+        if "cautious" in action.lower():
+            action = "Reduce exposure to high-risk sectors and increase allocation to defensive assets like healthcare and bonds"
 
         # -----------------------------
         # 🔥 POST-PROCESSING (CRITICAL)

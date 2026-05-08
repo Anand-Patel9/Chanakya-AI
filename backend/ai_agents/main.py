@@ -1,7 +1,9 @@
 import os
 from dotenv import load_dotenv
 
-# ✅ LOAD ENV FIRST
+# -----------------------------
+# ENV LOAD
+# -----------------------------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ENV_PATH = os.path.join(BASE_DIR, "..", ".env")
 load_dotenv(dotenv_path=ENV_PATH)
@@ -9,18 +11,28 @@ load_dotenv(dotenv_path=ENV_PATH)
 print("GROQ:", os.getenv("GROQ_API_KEY"))
 print("NEWS:", os.getenv("NEWS_API_KEY"))
 
-# ✅ IMPORTS
+# -----------------------------
+# IMPORTS
+# -----------------------------
 from fastapi import FastAPI
-from agents.research_agent import run_research_agent
+
 from routes.research_routes import router as research_router
+from api.rag_api import router as rag_router
+
 from agents.risk_agent import run_risk_agent
 from agents.compliance_agent import run_compliance_agent
 from agents.reporting_agent import generate_report
 from agents.distribution_agent import run_distribution_agent
 
+from ai_agents.orchestrator import run_orchestrator   # ✅ FIXED
+
+# -----------------------------
+# APP INIT
+# -----------------------------
 app = FastAPI()
 
 app.include_router(research_router)
+app.include_router(rag_router, prefix="/rag")
 
 # -----------------------------
 # RISK ONLY
@@ -30,7 +42,7 @@ def get_risk(portfolio_id: str = None):
     return run_risk_agent(portfolio_id)
 
 # -----------------------------
-# RISK + COMPLIANCE (CORRECT FLOW)
+# RISK + COMPLIANCE
 # -----------------------------
 @app.get("/risk-compliance")
 def get_risk_compliance(portfolio_id: int = None):
@@ -49,12 +61,28 @@ def get_risk_compliance(portfolio_id: int = None):
         }
     }
 
+# -----------------------------
+# REPORT
+# -----------------------------
 @app.get("/report")
 def get_report(portfolio_id: int = None):
     return generate_report(portfolio_id)
 
+# -----------------------------
+# 🔥 MAIN CHAT (NEW SYSTEM)
+# -----------------------------
 @app.get("/chat")
-async def chat(query: str, user_id: str = "default", portfolio_id: int = None):
+def chat(query: str):
+    try:
+        return run_orchestrator(query)
+    except Exception as e:
+        return {"error": str(e)}
+
+# -----------------------------
+# 🧪 LEGACY CHAT (OLD SYSTEM)
+# -----------------------------
+@app.get("/chat-legacy")
+async def chat_legacy(query: str, user_id: str = "default", portfolio_id: int = None):
     try:
         return run_distribution_agent(query, portfolio_id, user_id)
     except Exception as e:

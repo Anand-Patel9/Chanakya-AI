@@ -46,8 +46,12 @@ def run_distribution_agent(query: str, portfolio_id=None, user_id="default"):
         # 🧠 Build intelligence layer
         intel = build_intelligence(research, web)
 
+        print("🔥 FINAL INTEL:", intel)
+
         # 🤖 LLM reasoning
         response = generate_market_analysis(intel)
+
+        print("FINAL RESPONSE:", response)
 
     # -----------------------------
     # ⚠️ RISK FLOW

@@ -1,71 +1,79 @@
 const axios = require("axios");
 
-// FastAPI base URL
 const FASTAPI_URL = "http://127.0.0.1:8000";
 
 // -----------------------------
-// 🔹 Research Agent
+// 🔥 MAIN AI CHAT (ORCHESTRATOR)
 // -----------------------------
-exports.researchAgent = async (req, res) => {
+exports.chatAI = async (req, res) => {
   try {
-    const response = await axios.post(`${FASTAPI_URL}/research`);
+    const { query } = req.body;
+
+    if (!query) {
+      return res.status(400).json({
+        error: "Query is required",
+      });
+    }
+
+    const response = await axios.get(`${FASTAPI_URL}/chat`, {
+      params: { query }
+    });
 
     res.json(response.data);
+
+  } catch (error) {
+    console.error("❌ AI ERROR:", error.response?.data || error.message);
+
+    res.status(500).json({
+      error: "AI system failed",
+      details: error.response?.data || error.message,
+    });
+  }
+};
+
+// -----------------------------
+// 🔥 RAG QUERY
+// -----------------------------
+exports.ragQuery = async (req, res) => {
+  try {
+    const { query } = req.body;
+
+    const response = await axios.post(
+      `${FASTAPI_URL}/rag/query`,
+      { query }
+    );
+
+    res.json(response.data);
+
   } catch (error) {
     res.status(500).json({
-      error: "Research Agent Failed",
+      error: "RAG query failed",
       details: error.message,
     });
   }
 };
 
 // -----------------------------
-// 🔹 Risk Agent
+// 🔥 RAG UPLOAD
 // -----------------------------
-exports.riskAgent = async (req, res) => {
+exports.ragUpload = async (req, res) => {
   try {
-    const response = await axios.get(`${FASTAPI_URL}/risk`);
+    const formData = new FormData();
+    formData.append("file", req.file.buffer, req.file.originalname);
+
+    const response = await axios.post(
+      `${FASTAPI_URL}/rag/upload`,
+      formData,
+      {
+        headers: formData.getHeaders(),
+      }
+    );
 
     res.json(response.data);
+
   } catch (error) {
     res.status(500).json({
-      error: "Risk Agent Failed",
-      details: error.message,
-    });
-  }
-};
-
-// -----------------------------
-// 🔹 Communication Agent
-// -----------------------------
-exports.communicationAgent = async (req, res) => {
-  try {
-    const { question } = req.body;
-
-    const response = await axios.post(`${FASTAPI_URL}/communication`, {
-      question,
-    });
-
-    res.json(response.data);
-  } catch (error) {
-    res.status(500).json({
-      error: "Communication Agent Failed",
-      details: error.message,
-    });
-  }
-};
-
-// -----------------------------
-// 🔹 Portfolio Agent (ML Model)
-// -----------------------------
-exports.portfolioAgent = async (req, res) => {
-  try {
-    const response = await axios.get(`${FASTAPI_URL}/portfolio`);
-
-    res.json(response.data);
-  } catch (error) {
-    res.status(500).json({
-      error: "Portfolio Agent Failed",
+      error: "Upload failed",
       details: error.message,
     });
   }

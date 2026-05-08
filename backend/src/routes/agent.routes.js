@@ -1,66 +1,28 @@
 const express = require("express");
-const axios = require("axios");
+const multer = require("multer");
 
 const router = express.Router();
+const upload = multer();
 
 const {
-  researchAgent,
-  riskAgent,
-  communicationAgent,
-  portfolioAgent,
+  chatAI,
+  ragQuery,
+  ragUpload,
 } = require("../controllers/agent.controller");
 
 // ------------------------------
-// 🔹 EXISTING ROUTES (KEEP)
+// 🔥 AI ORCHESTRATOR
 // ------------------------------
-
-// Research
-router.post("/research", researchAgent);
-
-// Risk
-router.get("/risk", riskAgent);
-
-// Communication
-router.post("/communication", communicationAgent);
-
-// Portfolio
-router.get("/portfolio", portfolioAgent);
-
+router.post("/chat", chatAI);
 
 // ------------------------------
-// 🔥 MAIN AI ORCHESTRATOR ROUTE
+// 🔥 RAG QUERY
 // ------------------------------
-router.post("/ask-ai", async (req, res) => {
-  try {
-    const { question } = req.body;
+router.post("/rag/query", ragQuery);
 
-    // ✅ Validation
-    if (!question) {
-      return res.status(400).json({
-        error: "Question is required"
-      });
-    }
-
-    // 🔥 Call FastAPI Orchestrator
-    const response = await axios.post(
-      "http://127.0.0.1:8000/orchestrate",
-      { question }
-    );
-
-    // ✅ Send response back to frontend
-    res.json(response.data);
-
-  } catch (error) {
-    // 🔥 FULL DEBUG (VERY IMPORTANT)
-    console.error("❌ FULL ERROR:", error.response?.data || error.message);
-
-    res.status(500).json({
-      error: "AI service failed",
-      details: error.response?.data || error.message
-    });
-  }
-});
+// ------------------------------
+// 🔥 RAG FILE UPLOAD
+// ------------------------------
+router.post("/rag/upload", upload.single("file"), ragUpload);
 
 module.exports = router;
-
-console.log("Agent routes loaded successfully");

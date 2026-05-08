@@ -17,11 +17,14 @@ def safe_text(x):
 
 
 # -----------------------------
-# 🧠 BUILD CONTEXT FROM INTEL
+# 🧠 BUILD CONTEXT
 # -----------------------------
 def build_context(intel):
 
     context_blocks = []
+
+    for d in intel.get("drivers", []):
+        context_blocks.append(f"Driver: {safe_text(d)}")
 
     for n in intel.get("negative", []):
         context_blocks.append(f"Negative: {safe_text(n)}")
@@ -29,8 +32,9 @@ def build_context(intel):
     for p in intel.get("positive", []):
         context_blocks.append(f"Positive: {safe_text(p)}")
 
-    for m in intel.get("macro", []):
-        context_blocks.append(f"Macro: {safe_text(m)}")
+    rag_data = intel.get("rag", "")
+    if rag_data:
+        context_blocks.append(f"Document Insight: {safe_text(rag_data)[:500]}")
 
     return "\n".join(context_blocks)
 
@@ -45,14 +49,13 @@ def is_grounded(output_text, context):
 
     overlap = context_words.intersection(output_words)
 
-    # 🔥 Block hallucinated terms
     blocked_terms = ["iran", "nuclear", "world war", "collapse"]
 
     for term in blocked_terms:
         if term in output_text.lower() and term not in context.lower():
             return False
 
-    return len(overlap) >= 3   # ✅ RELAXED
+    return len(overlap) >= 3
 
 
 # -----------------------------
@@ -61,34 +64,40 @@ def is_grounded(output_text, context):
 def generate_market_analysis(intel):
 
     context = build_context(intel)
+    print("🧠 CONTEXT SENT TO LLM:\n", context)
 
     if not context:
         return {
             "type": "market_update",
-            "what_is_happening": "Insufficient data.",
-            "why_it_is_happening": "No strong signals available.",
-            "what_to_do": "Wait for clearer trends."
+            "what_is_happening": "No strong market signals detected.",
+            "why_it_is_happening": "Insufficient dominant macro drivers.",
+            "what_to_do": "Wait for clearer market direction."
         }
 
+    # -----------------------------
+    # 🔥 BLOOMBERG-LEVEL PROMPT
+    # -----------------------------
     prompt = f"""
-    You are a senior financial analyst.
+You are a senior macro strategist at a global asset management firm.
 
-    DATA:
-    {context}
+DATA (STRICTLY USE ONLY THIS):
+{context}
 
-    TASK:
-    - Identify top 1–2 drivers
-    - Give clear macro reasoning
-    - Avoid generic answers
+ANALYSIS RULES:
+- Identify EXACTLY 1–2 dominant drivers
+- Convert drivers into cause → market impact
+- Mention sectors/assets where relevant
+- NO generic phrases like "mixed signals" or "uncertainty"
+- NO repeating same words
 
-    OUTPUT (STRICT JSON):
+OUTPUT (STRICT JSON):
 
-    {{
-    "what_is_happening": "...",
-    "why_it_is_happening": "...",
-    "what_to_do": "..."
-    }}
-    """
+{{
+  "what_is_happening": "Clear market movement with asset-level impact",
+  "why_it_is_happening": "Cause → effect chain (e.g., oil ↑ → inflation ↑ → equities ↓)",
+  "what_to_do": "Precise action (sector allocation / risk positioning)"
+}}
+"""
 
     try:
         response = client.chat.completions.create(
@@ -98,6 +107,13 @@ def generate_market_analysis(intel):
         )
 
         raw = safe_text(response.choices[0].message.content)
+        print("🧠 RAW LLM OUTPUT:", raw)
+
+        # -----------------------------
+        # 🔧 FIX MARKDOWN JSON
+        # -----------------------------
+        if raw.startswith("```"):
+            raw = raw.replace("```json", "").replace("```", "").strip()
 
         parsed = json.loads(raw)
 
@@ -105,12 +121,39 @@ def generate_market_analysis(intel):
         why = safe_text(parsed.get("why_it_is_happening"))
         action = safe_text(parsed.get("what_to_do"))
 
+        # -----------------------------
+        # 🔥 POST-PROCESSING (CRITICAL)
+        # -----------------------------
+        if "due to" in why.lower():
+            why = why.replace("due to", "").strip()
+
+        if len(why.split()) < 6:
+            why = f"{why} impacting market conditions and investor sentiment"
+
+        # 🔥 Improve action quality
+        if "caution" in action.lower():
+            action = "Reduce exposure to volatile sectors and increase allocation to defensive assets"
+
         combined = what + why + action
 
-        # ✅ DO NOT BREAK SYSTEM — ONLY WARN
+        # -----------------------------
+        # 🛡️ GROUNDING CHECK
+        # -----------------------------
         if not is_grounded(combined, context):
             print("⚠️ Weak grounding detected")
 
+            macro = intel.get("macro", [])
+
+            return {
+                "type": "market_update",
+                "what_is_happening": "Markets are reacting to key macro drivers.",
+                "why_it_is_happening": f"Driven by {', '.join(macro)}.",
+                "what_to_do": "Stay cautious and align portfolio with macro trends."
+            }
+
+        # -----------------------------
+        # ✅ FINAL OUTPUT
+        # -----------------------------
         return {
             "type": "market_update",
             "what_is_happening": what,
@@ -123,7 +166,7 @@ def generate_market_analysis(intel):
 
         return {
             "type": "market_update",
-            "what_is_happening": "Markets are showing mixed signals.",
-            "why_it_is_happening": "Driven by macroeconomic and geopolitical factors.",
-            "what_to_do": "Maintain diversification and monitor developments."
+            "what_is_happening": "Markets are under pressure.",
+            "why_it_is_happening": "Driven by key macroeconomic developments.",
+            "what_to_do": "Maintain diversification and monitor risk exposure."
         }

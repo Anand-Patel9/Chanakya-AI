@@ -6,6 +6,7 @@ from ai_agents.services.region_service import classify_region
 from ai_agents.services.sector_mapper import map_sectors   # ✅ FIXED IMPORT
 from ai_agents.services.action_mapper import normalize_action   # ✅ NEW IMPORT
 from ai_agents.services.research_service import store_insights, get_insights  # ✅ NEW IMPORT
+from ai_agents.db.supabase_client import supabase
 
 
 # -----------------------------
@@ -14,7 +15,7 @@ from ai_agents.services.research_service import store_insights, get_insights  # 
 
 
 
-def run_research_agent():
+def run_research_agent(query=None):
     try:
         print("🚀 Running Research Agent...")
 
@@ -129,3 +130,10 @@ def run_research_agent():
     except Exception as e:
         print("🔥 AGENT CRASH:", e)
         return {"error": str(e)}
+
+def get_insights():
+    try:
+        return supabase.table("portfolio_research_insights").select("*").execute()
+    except Exception as e:
+        print("⚠️ Supabase error:", e)
+        return type("obj", (), {"data": []})

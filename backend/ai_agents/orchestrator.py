@@ -66,7 +66,7 @@ def research_node(state: AgentState):
         print("❌ Research error:", e)
         result = []
 
-    return {**state, "research_data": result}
+    return {"research_data": result}
 
 
 # -----------------------------
@@ -88,7 +88,7 @@ def intelligence_node(state: AgentState):
         print("❌ Intelligence error:", e)
         intel = {"macro": [], "drivers": []}
 
-    return {**state, "intelligence": intel}
+    return {"intelligence": intel}
 
 
 # -----------------------------
@@ -115,7 +115,7 @@ def analysis_node(state: AgentState):
             "what_to_do": "Retry request."
         }
 
-    return {**state, "analysis": analysis}
+    return {"analysis": analysis}
 
 
 # -----------------------------
@@ -136,7 +136,7 @@ def impact_node(state: AgentState):
         print("❌ Impact error:", e)
         impact = {}
 
-    return {**state, "impact": impact}
+    return {"impact": impact}
 
 
 # -----------------------------
@@ -152,7 +152,7 @@ def risk_node(state: AgentState):
         print("❌ Risk error:", e)
         risk = {}
 
-    return {**state, "risk_data": risk}
+    return {"risk_data": risk}
 
 
 # -----------------------------
@@ -173,7 +173,7 @@ def communication_node(state: AgentState):
 
     print("✅ FINAL RESPONSE:", response)
 
-    return {**state, "final_response": response}
+    return {"final_response": response}
 
 
 # -----------------------------
@@ -227,7 +227,7 @@ def rag_node(state: AgentState):
 
         context = rag_result.get("answer", "")
 
-        return {**state, "rag_context": context}
+        return {"rag_context": context}
 
     except Exception as e:
         print("❌ RAG error:", e)
@@ -243,6 +243,7 @@ def build_graph():
     # Nodes
     graph.add_node("router", router_node)
     graph.add_node("research", research_node)
+    graph.add_node("rag", rag_node)
     graph.add_node("intelligence", intelligence_node)
     graph.add_node("analysis", analysis_node)
     graph.add_node("impact", impact_node)
@@ -263,20 +264,16 @@ def build_graph():
         }
     )
 
-    # MARKET FLOW
-    graph.add_edge("research", "intelligence")
+    # ✅ FIXED FLOW (NO PARALLEL EXECUTION)
+    graph.add_edge("research", "rag")
+    graph.add_edge("rag", "intelligence")
     graph.add_edge("intelligence", "analysis")
     graph.add_edge("analysis", "impact")
     graph.add_edge("impact", "risk")
 
-    # COMMON FLOW
+    # Common flow
     graph.add_edge("risk", "communication")
     graph.add_edge("communication", "compliance")
-
-    graph.add_node("rag", rag_node)   # ✅ ADD
-
-    graph.add_edge("research", "rag")          # NEW
-    graph.add_edge("rag", "intelligence")      # NEW
 
     return graph.compile()
 

@@ -69,7 +69,7 @@ def fetch_portfolio_holdings(portfolio_id):
 def store_compliance_log(data):
 
     try:
-        supabase.table("compliance_logs").insert({
+        supabase.table("portfolio_compliance_checks").insert({
             "portfolio_id": data.get("portfolio_id"),
             "check_type": "Communication Review",
             "status": data["status"],
@@ -77,4 +77,4 @@ def store_compliance_log(data):
             "approved_by": None
         }).execute()
     except Exception as e:
-        print("Error storing compliance log:", e)
+        print("Error storing portfolio_compliance_checks:", e)

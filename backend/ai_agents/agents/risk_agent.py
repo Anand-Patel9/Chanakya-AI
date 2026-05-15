@@ -1,4 +1,4 @@
-from services.risk_service import (
+from ai_agents.services.risk_service import (
     calculate_returns,
     calculate_var,
     calculate_volatility,
@@ -8,20 +8,20 @@ from services.risk_service import (
 )
 
 # 🔥 INTELLIGENCE IMPORTS
-from services.risk_intelligence import aggregate_market_risk
-from services.portfolio_risk_mapper import map_portfolio_risk
-from services.concentration_risk import calculate_concentration_risk
-from services.correlation_risk import calculate_correlation_risk
-from services.event_risk import extract_event_risk
+from ai_agents.services.risk_intelligence import aggregate_market_risk
+from ai_agents.services.portfolio_risk_mapper import map_portfolio_risk
+from ai_agents.services.concentration_risk import calculate_concentration_risk
+from ai_agents.services.correlation_risk import calculate_correlation_risk
+from ai_agents.services.event_risk import extract_event_risk
 
 # 🔥 DECISION LAYER
-from services.decision_engine import generate_portfolio_decisions
-from services.rebalancer import suggest_rebalancing
+from ai_agents.services.decision_engine import generate_portfolio_decisions
+from ai_agents.services.rebalancer import suggest_rebalancing
 
 
 def run_risk_agent(portfolio_id=None, research_data=None):
 
-    from db.supabase_client import fetch_portfolio_holdings
+    from ai_agents.db.supabase_client import fetch_portfolio_holdings
 
     # -----------------------------
     # FETCH PORTFOLIO DATA

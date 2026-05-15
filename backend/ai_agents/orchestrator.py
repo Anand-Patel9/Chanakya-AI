@@ -1,8 +1,8 @@
 from langgraph.graph import StateGraph
 from typing import TypedDict, Dict, Any
 
-from agents.research_agent import run_research_agent
-from agents.risk_agent import run_risk_agent
+from ai_agents.agents.research_agent import run_research_agent
+from ai_agents.agents.risk_agent import run_risk_agent
 
 # -----------------------------
 # 🧠 STATE DEFINITION
@@ -77,7 +77,7 @@ def intelligence_node(state: AgentState):
     print("🧠 Running Intelligence Layer...")
 
     try:
-        from services.intelligence_layer import build_intelligence
+        from ai_agents.services.intelligence_layer import build_intelligence
 
         intel = build_intelligence(
             state.get("research_data", []) or [],
@@ -99,7 +99,7 @@ def analysis_node(state: AgentState):
     print("🤖 Running Market Analysis (LLM)...")
 
     try:
-        from services.llm_market_service import generate_market_analysis
+        from ai_agents.services.llm_market_service import generate_market_analysis
 
         analysis = generate_market_analysis({
             **state.get("intelligence", {}),
@@ -126,7 +126,7 @@ def impact_node(state: AgentState):
     print("📊 Running Market Impact Engine...")
 
     try:
-        from services.market_impact_engine import build_market_impact
+        from ai_agents.services.market_impact_engine import build_market_impact
 
         impact = build_market_impact(
             state.get("intelligence", {}) or {}
@@ -184,7 +184,7 @@ def compliance_node(state: AgentState):
     print("🛡️ Running Compliance Agent...")
 
     try:
-        from agents.compliance_agent import run_compliance_agent
+        from ai_agents.agents.compliance_agent import run_compliance_agent
 
         return run_compliance_agent(state)
 
@@ -221,7 +221,7 @@ def rag_node(state: AgentState):
         return {**state, "rag_context": ""}
 
     try:
-        from services.rag_service import generate_rag_answer
+        from ai_agents.services.rag_service import generate_rag_answer
 
         rag_result = generate_rag_answer(query, doc_id)
 

@@ -1,6 +1,6 @@
-from agents.research_agent import run_research_agent
-from agents.risk_agent import run_risk_agent
-from agents.compliance_agent import run_compliance_agent
+from ai_agents.agents.research_agent import run_research_agent
+from ai_agents.agents.risk_agent import run_risk_agent
+from ai_agents.agents.compliance_agent import run_compliance_agent
 import logging
 
 logging.basicConfig(level=logging.INFO)

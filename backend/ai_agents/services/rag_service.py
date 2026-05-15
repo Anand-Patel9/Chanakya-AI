@@ -2,7 +2,7 @@
 
 import os
 from groq import Groq
-from services.vector_store import query_document
+from ai_agents.services.vector_store import query_document
 
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 

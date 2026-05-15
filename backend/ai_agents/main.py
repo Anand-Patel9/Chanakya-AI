@@ -16,14 +16,13 @@ print("NEWS:", os.getenv("NEWS_API_KEY"))
 # -----------------------------
 from fastapi import FastAPI
 
-from routes.research_routes import router as research_router
-from api.rag_api import router as rag_router
+from ai_agents.api.rag_api import router as rag_router
+from ai_agents.routes.research_routes import router as research_router
 
-from agents.risk_agent import run_risk_agent
-from agents.compliance_agent import run_compliance_agent
-from agents.reporting_agent import generate_report
-from agents.distribution_agent import run_distribution_agent
-
+from ai_agents.agents.risk_agent import run_risk_agent
+from ai_agents.agents.compliance_agent import run_compliance_agent
+from ai_agents.agents.reporting_agent import generate_report
+from ai_agents.agents.distribution_agent import run_distribution_agent
 from ai_agents.orchestrator import run_orchestrator   # ✅ FIXED
 
 # -----------------------------

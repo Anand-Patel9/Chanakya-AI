@@ -1,5 +1,5 @@
-from services.research_service import get_insights
-from services.sector_mapper import map_sectors
+from ai_agents.services.research_service import get_insights
+from ai_agents.services.sector_mapper import map_sectors
 
 
 def extract_event_risk():

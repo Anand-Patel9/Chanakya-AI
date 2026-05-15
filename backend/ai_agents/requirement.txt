@@ -4,3 +4,9 @@ requests
 pandas
 nltk
 supabase
+python-dotenv
+python-docx
+PyMuPDF
+groq
+sentence-transformers
+transformers torch

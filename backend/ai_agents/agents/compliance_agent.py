@@ -1,5 +1,5 @@
-from services.compliance_service import check_compliance
-from db.supabase_client import store_compliance_log
+from ai_agents.services.compliance_service import check_compliance
+from ai_agents.db.supabase_client import store_compliance_log 
 
 
 def run_compliance_agent(state):

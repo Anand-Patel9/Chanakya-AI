@@ -1,11 +1,11 @@
-from services.news_service import get_all_news
-from services.llm_service import generate_insight, normalize_sectors
-from services.research_service import store_insights
-from services.ranking_service import rank_insights
-from services.region_service import classify_region
-from services.sector_mapper import map_sectors   # ✅ FIXED IMPORT
-from services.action_mapper import normalize_action   # ✅ NEW IMPORT
-from services.research_service import store_insights, get_insights  # ✅ NEW IMPORT
+from ai_agents.services.news_service import get_all_news
+from ai_agents.services.llm_service import generate_insight, normalize_sectors
+from ai_agents.services.research_service import store_insights
+from ai_agents.services.ranking_service import rank_insights
+from ai_agents.services.region_service import classify_region
+from ai_agents.services.sector_mapper import map_sectors   # ✅ FIXED IMPORT
+from ai_agents.services.action_mapper import normalize_action   # ✅ NEW IMPORT
+from ai_agents.services.research_service import store_insights, get_insights  # ✅ NEW IMPORT
 
 
 # -----------------------------

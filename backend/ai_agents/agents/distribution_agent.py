@@ -1,11 +1,11 @@
-from agents.research_agent import run_research_agent
-from agents.risk_agent import run_risk_agent
-from agents.reporting_agent import generate_report
+from ai_agents.agents.research_agent import run_research_agent
+from ai_agents.agents.risk_agent import run_risk_agent
+from ai_agents.agents.reporting_agent import generate_report
 
-from services.web_search_service import search_web
-from services.memory_service import save_interaction, get_memory
-from services.llm_market_service import generate_market_analysis
-from services.intelligence_layer import build_intelligence
+from ai_agents.services.web_search_service import search_web
+from ai_agents.services.memory_service import save_interaction, get_memory
+from ai_agents.services.llm_market_service import generate_market_analysis
+from ai_agents.services.intelligence_layer import build_intelligence
 
 
 # -----------------------------

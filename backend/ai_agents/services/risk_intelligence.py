@@ -1,5 +1,5 @@
-from services.research_service import get_insights
-from services.sector_mapper import map_sectors
+from ai_agents.services.research_service import get_insights
+from ai_agents.services.sector_mapper import map_sectors
 
 
 def aggregate_market_risk(insights=None):

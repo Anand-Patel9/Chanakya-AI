@@ -1,6 +1,6 @@
 import requests
 import os
-from services.news_service import fetch_newsapi, fetch_gnews, fetch_finnhub
+from ai_agents.services.news_service import fetch_newsapi, fetch_gnews, fetch_finnhub
 
 
 # -----------------------------

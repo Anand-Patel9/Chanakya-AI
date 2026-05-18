@@ -88,7 +88,7 @@ def intelligence_node(state: AgentState):
         print("❌ Intelligence error:", e)
         intel = {"macro": [], "drivers": []}
 
-    return {"intelligence": intel}
+    return {**state, "intelligence": intel}
 
 
 # -----------------------------

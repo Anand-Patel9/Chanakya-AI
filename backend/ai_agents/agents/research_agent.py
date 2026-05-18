@@ -1,6 +1,5 @@
 from ai_agents.services.news_service import get_all_news
 from ai_agents.services.llm_service import generate_insight, normalize_sectors
-from ai_agents.services.research_service import store_insights
 from ai_agents.services.ranking_service import rank_insights
 from ai_agents.services.region_service import classify_region
 from ai_agents.services.sector_mapper import map_sectors   # ✅ FIXED IMPORT
